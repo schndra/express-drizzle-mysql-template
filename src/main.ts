@@ -1,16 +1,34 @@
 import express from "express";
 import { db } from "./db/connect";
 import config from "./config";
-import { UserTable } from "./db/schema";
+import { userTable } from "./db/schema";
+import { sql } from "drizzle-orm";
+import { StatusCodes } from "http-status-codes";
 const app = express();
 
+app.use(express.json());
+
 app.get("/", async function (req, res) {
-  const users = await db.select().from(UserTable);
+  // const userList = await db.select().from(users);
+  const userList = (await db.execute(sql`SELECT * FROM ${userTable}`))[0];
 
   res.status(200).json({
-    users,
+    users: userList,
     message: "success",
   });
+});
+
+app.post("/create-user", async function (req, res) {
+  const user = await db.insert(userTable).values(req.body).$returningId();
+
+  res.status(StatusCodes.CREATED).json({
+    user,
+    message: "user created successfully",
+  });
+});
+
+app.use("*", (req, res) => {
+  res.status(StatusCodes.NOT_FOUND).json({ msg: "Not Found" });
 });
 
 const port = config.port || 5000;
