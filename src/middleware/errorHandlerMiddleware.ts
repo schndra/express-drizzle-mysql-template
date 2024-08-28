@@ -1,17 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { StatusCodes } from 'http-status-codes';
+import { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 
 const errorHandlerMiddleware = async (
-  err: any,
-  req: any,
-  res: any,
-  next: any
+  err: Error & {
+    statusCode: number;
+  },
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   console.log(err);
 
   const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
 
-  const msg = err.message || 'something went wrong try again late';
+  const msg = err.message || "something went wrong try again later";
 
   res.status(statusCode).json({ msg });
 };
