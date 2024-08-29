@@ -1,43 +1,55 @@
-import express from 'express';
-import { db } from './db/connect';
-import config from './config';
-import { userTable } from './db/schema';
-import { sql } from 'drizzle-orm';
-import { StatusCodes } from 'http-status-codes';
-import morgan from 'morgan';
+import express, { NextFunction, Request, Response } from "express";
+import { db } from "./db/connect";
+import config from "./config";
+import { userTable } from "./db/schema";
+import { sql } from "drizzle-orm";
+import { StatusCodes } from "http-status-codes";
+import morgan from "morgan";
 
 //middleware
-import errorHandlerMiddleware from './middleware/errorHandlerMiddleware';
+import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
+import { ResultSetHeader } from "mysql2";
+import { BadRequest } from "./errors/custom-error";
 
 const app = express();
 
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(express.json());
 
-app.get('/', async function (req, res) {
+app.get("/api/v1/users", async function (req, res, next) {
   // const userList = await db.select().from(users);
-  const userList = (await db.execute(sql`SELECT * FROM ${userTable}`))[0];
+  try {
+    const userList = await db.query.userTable.findMany({});
 
-  res.status(200).json({
-    users: userList,
-    message: 'success',
-  });
+    if (userList.length > 0) {
+      throw new BadRequest("is this working");
+    }
+
+    console.log(userList); // throw new Error("nothing");
+
+    res.status(200).json({
+      users: userList,
+      message: "success",
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.post('/create-user', async function (req, res) {
+app.post("/api/v1/users", async function (req, res) {
   const user = await db.insert(userTable).values(req.body).$returningId();
 
   res.status(StatusCodes.CREATED).json({
     user,
-    message: 'user created successfully',
+    msg: "user created successfully",
   });
 });
 
-app.use(errorHandlerMiddleware);
-
-app.use('*', (req, res) => {
-  res.status(StatusCodes.NOT_FOUND).json({ msg: 'Not Found' });
+app.use("*", (req, res) => {
+  res.status(StatusCodes.NOT_FOUND).json({ msg: "Not Found" });
 });
+
+app.use(errorHandlerMiddleware);
 
 const port = config.port || 5000;
 
@@ -47,7 +59,7 @@ const start = async () => {
       console.log(`Server started at http://localhost:${port}`);
     });
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error("Something went wrong...", error);
   }
 };
 

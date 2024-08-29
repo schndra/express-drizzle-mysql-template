@@ -9,7 +9,7 @@ const errorHandlerMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(err);
+  console.log(err.name);
 
   const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
 
