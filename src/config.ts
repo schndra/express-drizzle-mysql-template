@@ -1,5 +1,6 @@
 const config = {
-  port: process.env.PORT,
+  env: process.env.NODE_ENV || "development",
+  port: parseInt(process.env.PORT || "3000"),
   getDatabaseConfig: () => ({
     database: process.env.DB_NAME,
     user: process.env.DB_USERNAME,
