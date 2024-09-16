@@ -2,13 +2,11 @@ import express, { NextFunction, Request, Response } from "express";
 import { db } from "./db/connect";
 import config from "./config";
 import { userTable } from "./db/schema";
-import { sql } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
-
+import "express-async-errors";
 //middleware
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
-import { ResultSetHeader } from "mysql2";
 import { BadRequest } from "./errors/custom-error";
 
 const app = express();
@@ -18,22 +16,18 @@ app.use(express.json());
 
 app.get("/api/v1/users", async function (req, res, next) {
   // const userList = await db.select().from(users);
-  try {
-    const userList = await db.query.userTable.findMany({});
+  const userList = await db.query.userTable.findMany({});
 
-    if (userList.length > 0) {
-      throw new BadRequest("is this working");
-    }
-
-    console.log(userList); // throw new Error("nothing");
-
-    res.status(200).json({
-      users: userList,
-      message: "success",
-    });
-  } catch (error) {
-    next(error);
+  if (userList.length > 0) {
+    throw new BadRequest("is this working");
   }
+
+  console.log(userList); // throw new Error("nothing");
+
+  res.status(200).json({
+    users: userList,
+    message: "success",
+  });
 });
 
 app.post("/api/v1/users", async function (req, res) {
