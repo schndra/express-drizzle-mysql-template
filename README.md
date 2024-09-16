@@ -16,6 +16,7 @@
 - [x] Initialize project with typescript.
 - [x] Add drizzle with MySQL.
 - [x] Add Express.js.
+- [x] Add Error handling
 - [ ] Add `docker-compose.yml` for local MySQL.
 - [ ] Add JWT based authentication with access & refresh tokens.
 
