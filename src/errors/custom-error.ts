@@ -9,7 +9,7 @@ class NotFoundError extends Error {
   }
 }
 
-class BadRequest extends Error {
+class BadRequestError extends Error {
   statusCode: number;
   constructor(message: string) {
     super(message);
@@ -36,4 +36,4 @@ class UnauthorizedError extends Error {
   }
 }
 
-export { NotFoundError, BadRequest, UnauthenticatedError, UnauthorizedError };
+export { NotFoundError, BadRequestError, UnauthenticatedError, UnauthorizedError };
