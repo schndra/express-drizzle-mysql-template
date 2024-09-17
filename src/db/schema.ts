@@ -1,5 +1,5 @@
 import { int, mysqlTable, varchar, text } from "drizzle-orm/mysql-core";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = mysqlTable("user", {
@@ -13,4 +13,14 @@ export const insertUserSchema = createInsertSchema(users, {
   name: z.string().min(3, {
     message: "name must be at least 3 characters",
   }),
+});
+
+export const selectUserSchema = createSelectSchema(users, {
+  email: (schema) =>
+    schema.email.email().regex(/^([\w.%-]+@[a-z0-9.-]+\.[a-z]{2,6})*$/i),
+});
+
+export const loginSchema = selectUserSchema.pick({
+  email: true,
+  password: true,
 });

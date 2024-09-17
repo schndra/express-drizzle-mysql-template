@@ -8,6 +8,7 @@ const config = {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT || "3306"),
   }),
+  jwtSecret: process.env.JWT_SECRET!,
 };
 
 export default config;
