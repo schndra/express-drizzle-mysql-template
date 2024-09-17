@@ -1,43 +1,49 @@
 import express, { NextFunction, Request, Response } from "express";
 import { db } from "./db/connect";
 import config from "./config";
-import { userTable } from "./db/schema";
 import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
 import "express-async-errors";
 //middleware
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
-import { BadRequest } from "./errors/custom-error";
+import authRouter from "./routes/authRouter";
+import { sql } from "drizzle-orm";
+// import { users } from "./db/schema";
+// import { BadRequestError } from "./errors/custom-error";
+// import userRouter from "./routes/userRoute";
 
 const app = express();
 
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.get("/api/v1/users", async function (req, res, next) {
-  // const userList = await db.select().from(users);
-  const userList = await db.query.userTable.findMany({});
+app.use("/api/v1/auth", authRouter);
+// app.use("/api/v1/users", userRouter);
 
-  if (userList.length > 0) {
-    throw new BadRequest("is this working");
-  }
+// app.get("/api/v1/users", async function (req, res, next) {
+//   // const userList = await db.select().from(users);
+//   const userList = await db.query.userTable.findMany({});
 
-  console.log(userList); // throw new Error("nothing");
+//   if (userList.length < 0) {
+//     throw new BadRequestError("is this working");
+//   }
 
-  res.status(200).json({
-    users: userList,
-    message: "success",
-  });
-});
+//   console.log(userList); // throw new Error("nothing");
 
-app.post("/api/v1/users", async function (req, res) {
-  const user = await db.insert(userTable).values(req.body).$returningId();
+//   res.status(200).json({
+//     users: userList,
+//     message: "success",
+//   });
+// });
 
-  res.status(StatusCodes.CREATED).json({
-    user,
-    msg: "user created successfully",
-  });
-});
+// app.post("/api/v1/users", async function (req, res) {
+//   const user = await db.insert(userTable).values(req.body).$returningId();
+
+//   res.status(StatusCodes.CREATED).json({
+//     user,
+//     msg: "user created successfully",
+//   });
+// });
 
 app.use("*", (req, res) => {
   res.status(StatusCodes.NOT_FOUND).json({ msg: "Not Found" });
@@ -49,11 +55,12 @@ const port = config.port || 5000;
 
 const start = async () => {
   try {
+    const x = await db.execute(sql`SELECT 1`);
     app.listen(port, () => {
       console.log(`Server started at http://localhost:${port}`);
     });
   } catch (error) {
-    console.error("Something went wrong...", error);
+    console.error("Error connecting to the database", error);
   }
 };
 
