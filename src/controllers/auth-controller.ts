@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { db } from "../db/connect";
 import { insertUserSchema, loginSchema, users } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { BadRequestError } from "../errors/custom-error";
+import { BadRequestError, UnauthenticatedError } from "../errors/custom-error";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config";
@@ -13,7 +13,7 @@ const register = async (req: Request, res: Response) => {
   const { email, name, password } = insertUserSchema.parse(req.body);
 
   //check for existing user (TODO: write a reusable func :p)
-  const existingUser = await db
+  const [existingUser] = await db
     .select()
     .from(users)
     .where(eq(users.email, email))
@@ -21,7 +21,7 @@ const register = async (req: Request, res: Response) => {
 
   // console.log(existingUser);
 
-  if (existingUser.length > 0) {
+  if (existingUser) {
     throw new BadRequestError(`A user with email ${email} already exists.`);
   }
 
@@ -58,7 +58,7 @@ const login = async (req: Request, res: Response) => {
     .limit(1);
 
   if (!existingUser) {
-    throw new BadRequestError(`No account found with email ${email}`);
+    throw new UnauthenticatedError(`Invalid Credintials`);
   }
 
   // compare password
@@ -73,7 +73,16 @@ const login = async (req: Request, res: Response) => {
     expiresIn: "15d", //later make it 15m :p
   });
 
-  res.status(StatusCodes.OK).json({ msg: "user Signed In", token });
+  res
+    .status(StatusCodes.OK)
+    .json({ user: { name: existingUser.name }, msg: "user Signed In", token });
 };
 
-export { login, register };
+const testAuthRoutes = (req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json({
+    msg: "this is to test auth routes",
+    user: req.user,
+  });
+};
+
+export { login, register, testAuthRoutes };

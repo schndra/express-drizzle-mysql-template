@@ -9,15 +9,24 @@ export const users = mysqlTable("user", {
   password: text("password").notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users, {
+export const selectUserSchema = createSelectSchema(users, {
+  email: (schema) =>
+    schema.email.email().regex(/^([\w.%-]+@[a-z0-9.-]+\.[a-z]{2,6})*$/i),
   name: z.string().min(3, {
     message: "name must be at least 3 characters",
   }),
 });
 
-export const selectUserSchema = createSelectSchema(users, {
-  email: (schema) =>
-    schema.email.email().regex(/^([\w.%-]+@[a-z0-9.-]+\.[a-z]{2,6})*$/i),
+// export const insertUserSchema = createInsertSchema(users, {
+//   name: z.string().min(3, {
+//     message: "name must be at least 3 characters",
+//   }),
+// });
+
+export const insertUserSchema = selectUserSchema.pick({
+  email: true,
+  name: true,
+  password: true,
 });
 
 export const loginSchema = selectUserSchema.pick({

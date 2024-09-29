@@ -6,7 +6,7 @@ import morgan from "morgan";
 import "express-async-errors";
 //middleware
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware";
-import authRouter from "./routes/authRouter";
+import authRouter from "./routes/auth-router";
 import { sql } from "drizzle-orm";
 // import { users } from "./db/schema";
 // import { BadRequestError } from "./errors/custom-error";
@@ -18,7 +18,6 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
-// app.use("/api/v1/users", userRouter);
 
 // app.get("/api/v1/users", async function (req, res, next) {
 //   // const userList = await db.select().from(users);
